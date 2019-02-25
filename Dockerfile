@@ -11,32 +11,29 @@ ENV DYNESDK=https://sdk.dyne.org:4443/job
 
 RUN apt-get -y update && apt-get -y upgrade
 
-# RUN mkdir -p /usr/share/man/man1/ \
-# 	&& apt-get -yy update && apt-get -yy upgrade \
-# 	&& apt-get -yy install supervisor daemontools \
-# 	   		   	   tmux curl net-tools python3
-
-# ENV BUILD_DEPS="build-essential zlib1g-dev gcc make autoconf automake pkg-config uuid-dev"
-# RUN apt-get -yq install $BUILD_DEPS
-
-RUN apt-get install -y -q python3-pip
-# RUN pip3 install --upgrade pip3
-RUN pip3 install grpcio-tools
-RUN pip3 install zenroom
-
 RUN git clone https://github.com/hyperledger/sawtooth-core /opt/sawtooth
-RUN mkdir -p /var/log/sawtooth
+RUN mkdir -p /var/log/sawtooth \
+ && mkdir -p /etc/sawtooth/keys \
+ && mkdir -p /var/lib/sawtooth
 
+RUN apt-get install -y -q python3-pip python3-zmq python3-yaml \
+					   	  python3-toml python3-colorlog python3-cbor
+RUN pip3 install grpcio-tools requests zenroom
 
 COPY zenroom_python /opt/sawtooth/sdk/examples/zenroom_python
-
 
 ENV PATH=$PATH:/opt/sawtooth/sdk/examples/zenroom_python
 
 WORKDIR /opt/sawtooth
 
-CMD echo "\033[0;32m--- Building zenroom-tp-python ---\n\033[0m" \
+RUN echo "\033[0;32m--- Building zenroom-tp-python ---\n\033[0m" \
  && bin/protogen \
- && cd sdk/examples/zenroom_python \
- && python3 setup.py clean --all \
- && python3 setup.py build
+ && cd cli \
+ && pip3 install -e . \
+ &&	cd ../sdk/python \
+ && pip3 install -e . \
+ && cd ../examples/zenroom_python \
+ && pip3 install -e .
+
+CMD intkey-tp-python -v -C tcp://localhost:4004
+
