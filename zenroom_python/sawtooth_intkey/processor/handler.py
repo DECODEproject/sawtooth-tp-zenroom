@@ -27,7 +27,7 @@ from sawtooth_sdk.processor.exceptions import InternalError
 LOGGER = logging.getLogger(__name__)
 
 
-VALID_VERBS = 'set', 'inc', 'dec', 'keygen'
+VALID_VERBS = 'set', 'inc', 'dec', 'zenroom'
 
 MIN_VALUE = 0
 MAX_VALUE = 4294967295
@@ -72,7 +72,6 @@ def _unpack_transaction(transaction):
 
     _validate_verb(verb)
     _validate_name(name)
-    _validate_value(value)
 
     return verb, name, value
 
@@ -103,7 +102,7 @@ def _decode_transaction(transaction):
 
 def _validate_verb(verb):
     if verb not in VALID_VERBS:
-        raise InvalidTransaction('Verb must be "set", "inc", or "dec"')
+        raise InvalidTransaction('Verb must be "set", "inc", "dec" or "zenroom"')
 
 
 def _validate_name(name):
@@ -151,7 +150,7 @@ def _do_intkey(verb, name, value, state):
         'set': _do_set,
         'inc': _do_inc,
         'dec': _do_dec,
-        'keygen': _do_keygen,
+        'zenroom': _do_zenroom,
     }
 
     try:
@@ -161,26 +160,11 @@ def _do_intkey(verb, name, value, state):
         raise InternalError('Unhandled verb: {}'.format(verb))
 
 
-def _do_keygen(name, value, state):
-    msg = 'Creating a coconut keypair'
+def _do_zenroom(name, value, state):
+    msg = 'Executing a zenroom script: %s ' % value
     LOGGER.info(msg)
+    result = zenroom.execute(value).decode()
 
-    contract = """
-ZEN:begin(0)
-
-ZEN:parse([[
-Scenario 'coconut': "To run over the mobile wallet the first time and store the output as keypair.keys"
-          Given that I am known as 'unique_id'
-          When I create my new keypair
-          Then print all data
-]])
-
-ZEN:run()
-"""
-
-    result = zenroom.execute(contract).decode()
-
-    # run some zencode
     updated = {k: v for k, v in state.items()}
     updated[name] = result
 

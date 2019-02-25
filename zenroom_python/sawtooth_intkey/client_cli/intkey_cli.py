@@ -109,6 +109,7 @@ def create_parser(prog_name):
 
     subparsers = parser.add_subparsers(title='subcommands', dest='command')
 
+    add_zenroom_parser(subparsers, parent_parser)
     add_set_parser(subparsers, parent_parser)
     add_inc_parser(subparsers, parent_parser)
     add_dec_parser(subparsers, parent_parser)
@@ -209,7 +210,51 @@ def add_inc_parser(subparsers, parent_parser):
 def do_inc(args):
     name, value, wait = args.name, args.value, args.wait
     client = _get_client(args)
-    response = client.keygen(name, value, wait)
+    response = client.inc(name, value, wait)
+    print(response)
+
+
+def add_zenroom_parser(subparsers, parent_parser):
+    message = 'Executes a zenroom script with a <name> and <value> is the script.'
+
+    parser = subparsers.add_parser(
+        'zenroom',
+        parents=[parent_parser],
+        description=message,
+        help='This will run a zenroom script')
+
+    parser.add_argument(
+        'name',
+        type=str,
+        help='identify name of key you want to play with')
+
+    parser.add_argument(
+        'value',
+        type=int,
+        help='specify your zenroom to run')
+
+    parser.add_argument(
+        '--url',
+        type=str,
+        help='specify URL of REST API')
+
+    parser.add_argument(
+        '--keyfile',
+        type=str,
+        help="identify file containing user's private key")
+
+    parser.add_argument(
+        '--wait',
+        nargs='?',
+        const=sys.maxsize,
+        type=int,
+        help='set time, in seconds, to wait for transaction to commit')
+
+
+def do_zenroom(args):
+    name, value, wait = args.name, args.value, args.wait
+    client = _get_client(args)
+    response = client.zenroom(name, value, wait)
     print(response)
 
 
@@ -345,6 +390,8 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
 
     if args.command == 'set':
         do_set(args)
+    elif args.command == 'zenroom':
+        do_zenroom(args)
     elif args.command == 'inc':
         do_inc(args)
     elif args.command == 'dec':
