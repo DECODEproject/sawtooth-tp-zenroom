@@ -9,13 +9,12 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - ISOLATION_ID=${ISOLATION_ID}
         - http_proxy
         - https_proxy
         - no_proxy
     tty: true
     stdin_open: true
-    # image: sawtooth-zenroom-tp:${ISOLATION_ID}
+    image: sawtooth-zenroom-tp:devel
     container_name: zenroom-tp
     depends_on:
       - validator
@@ -42,13 +41,13 @@ services:
     image: hyperledger/sawtooth-rest-api:nightly
     container_name: rest-api
     ports:
-      - '8080:8080'
+      - '8090:8090'
     depends_on:
       - validator
     entrypoint: |
       sawtooth-rest-api -vv
         --connect tcp://validator:4004
-        --bind rest-api:8080
+        --bind rest-api:8090
 
   devmode-rust:
     image: hyperledger/sawtooth-devmode-engine-rust:nightly
