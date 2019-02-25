@@ -230,7 +230,7 @@ def add_zenroom_parser(subparsers, parent_parser):
 
     parser.add_argument(
         'value',
-        type=int,
+        type=str,
         help='specify your zenroom to run')
 
     parser.add_argument(

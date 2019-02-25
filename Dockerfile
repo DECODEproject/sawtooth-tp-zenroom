@@ -16,8 +16,8 @@ RUN mkdir -p /var/log/sawtooth \
  && mkdir -p /etc/sawtooth/keys \
  && mkdir -p /var/lib/sawtooth
 
-RUN apt-get install -y -q python3-pip python3-zmq python3-yaml \
-					   	  python3-toml python3-colorlog python3-cbor
+RUN apt-get install -y -q python3-pip python3-zmq python3-yaml python3-setuptools \
+					   	  python3-toml python3-colorlog python3-cbor python3-dev
 RUN pip3 install grpcio-tools requests zenroom
 
 COPY zenroom_python /opt/sawtooth/sdk/examples/zenroom_python

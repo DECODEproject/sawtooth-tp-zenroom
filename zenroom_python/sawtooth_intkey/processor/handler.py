@@ -15,9 +15,9 @@
 
 import logging
 import hashlib
-import zenroom
 import cbor
 
+from zenroom import zenroom
 
 from sawtooth_sdk.processor.handler import TransactionHandler
 from sawtooth_sdk.processor.exceptions import InvalidTransaction
@@ -163,7 +163,7 @@ def _do_intkey(verb, name, value, state):
 def _do_zenroom(name, value, state):
     msg = 'Executing a zenroom script: %s ' % value
     LOGGER.info(msg)
-    result = zenroom.execute(value).decode()
+    result = zenroom.execute(value.encode()).decode()
 
     updated = {k: v for k, v in state.items()}
     updated[name] = result

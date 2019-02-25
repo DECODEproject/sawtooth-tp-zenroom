@@ -31,6 +31,7 @@ setup(
         "colorlog",
         "sawtooth-sdk",
         "sawtooth-signing",
+        "zenroom==0.0.9",
     ],
     data_files=data_files,
     entry_points={
