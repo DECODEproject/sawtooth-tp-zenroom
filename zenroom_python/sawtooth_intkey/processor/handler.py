@@ -15,7 +15,7 @@
 
 import logging
 import hashlib
-
+import zenroom
 import cbor
 
 
@@ -27,7 +27,7 @@ from sawtooth_sdk.processor.exceptions import InternalError
 LOGGER = logging.getLogger(__name__)
 
 
-VALID_VERBS = 'set', 'inc', 'dec'
+VALID_VERBS = 'set', 'inc', 'dec', 'keygen'
 
 MIN_VALUE = 0
 MAX_VALUE = 4294967295
@@ -151,6 +151,7 @@ def _do_intkey(verb, name, value, state):
         'set': _do_set,
         'inc': _do_inc,
         'dec': _do_dec,
+        'keygen': _do_keygen,
     }
 
     try:
@@ -158,6 +159,32 @@ def _do_intkey(verb, name, value, state):
     except KeyError:
         # This would be a programming error.
         raise InternalError('Unhandled verb: {}'.format(verb))
+
+
+def _do_keygen(name, value, state):
+    msg = 'Creating a coconut keypair'
+    LOGGER.info(msg)
+
+    contract = """
+ZEN:begin(0)
+
+ZEN:parse([[
+Scenario 'coconut': "To run over the mobile wallet the first time and store the output as keypair.keys"
+          Given that I am known as 'unique_id'
+          When I create my new keypair
+          Then print all data
+]])
+
+ZEN:run()
+"""
+
+    result = zenroom.execute(contract).decode()
+
+    # run some zencode
+    updated = {k: v for k, v in state.items()}
+    updated[name] = result
+
+    return updated
 
 
 def _do_set(name, value, state):

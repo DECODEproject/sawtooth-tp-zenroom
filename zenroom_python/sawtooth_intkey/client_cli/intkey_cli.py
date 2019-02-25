@@ -175,7 +175,8 @@ def add_inc_parser(subparsers, parent_parser):
         'inc',
         parents=[parent_parser],
         description=message,
-        help='Increments an intkey value')
+        help='RUNS ZENROOM keygen example??')
+
 
     parser.add_argument(
         'name',
@@ -208,7 +209,7 @@ def add_inc_parser(subparsers, parent_parser):
 def do_inc(args):
     name, value, wait = args.name, args.value, args.wait
     client = _get_client(args)
-    response = client.inc(name, value, wait)
+    response = client.keygen(name, value, wait)
     print(response)
 
 

@@ -28,8 +28,7 @@ if os.path.exists("tests"):
 
 setup(
     name='sawtooth-intkey-tests',
-    version=subprocess.check_output(
-        ['../../../bin/get_version']).decode('utf-8').strip(),
+    version='0.1.0',
     description='Sawtooth Intkey Python Test',
     author='Hyperledger Sawtooth',
     url='https://github.com/hyperledger/sawtooth-core',

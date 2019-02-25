@@ -70,6 +70,9 @@ class IntkeyClient:
     def dec(self, name, value, wait=None):
         return self._send_transaction('dec', name, value, wait=wait)
 
+    def keygen(self, name, value, wait=None):
+        return self._send_transaction('keygen', name, value, wait=wait)
+
     def list(self):
         result = self._send_request(
             "state?address={}".format(

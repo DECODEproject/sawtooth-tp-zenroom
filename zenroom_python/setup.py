@@ -13,10 +13,6 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-from __future__ import print_function
-
-import os
-import subprocess
 
 from setuptools import setup, find_packages
 
@@ -25,8 +21,7 @@ data_files = []
 
 setup(
     name='sawtooth-intkey',
-    version=subprocess.check_output(
-        ['../../../bin/get_version']).decode('utf-8').strip(),
+    version="0.1.0",
     description='Sawtooth Intkey Python Example',
     author='Hyperledger Sawtooth',
     url='https://github.com/hyperledger/sawtooth-core',

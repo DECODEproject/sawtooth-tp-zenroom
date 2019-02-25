@@ -22,6 +22,7 @@ RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get install -y -q python3-pip
 # RUN pip3 install --upgrade pip3
 RUN pip3 install grpcio-tools
+RUN pip3 install zenroom
 
 RUN git clone https://github.com/hyperledger/sawtooth-core /opt/sawtooth
 RUN mkdir -p /var/log/sawtooth
