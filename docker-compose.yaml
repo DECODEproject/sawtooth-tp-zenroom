@@ -24,21 +24,21 @@ services:
       "
 
   block-info-tp:
-    image: hyperledger/sawtooth-block-info-tp:nightly
+    image: hyperledger/sawtooth-block-info-tp:latest
     container_name: block-info-tp
     depends_on:
       - validator
     command: block-info-tp -vv --connect tcp://validator:4004
 
   settings-tp:
-    image: hyperledger/sawtooth-settings-tp:nightly
+    image: hyperledger/sawtooth-settings-tp:latest
     container_name: settings-tp
     depends_on:
       - validator
     command: settings-tp -vv --connect tcp://validator:4004
 
   rest-api:
-    image: hyperledger/sawtooth-rest-api:nightly
+    image: hyperledger/sawtooth-rest-api:latest
     container_name: rest-api
     ports:
       - '8090:8090'
@@ -50,14 +50,14 @@ services:
         --bind rest-api:8090
 
   devmode-rust:
-    image: hyperledger/sawtooth-devmode-engine-rust:nightly
+    image: hyperledger/sawtooth-devmode-engine-rust:latest
     container_name: devmode-engine-rust
     depends_on:
       - validator
     command: devmode-engine-rust -v --connect tcp://validator:5050
 
   validator:
-    image: hyperledger/sawtooth-validator:nightly
+    image: hyperledger/sawtooth-validator:latest
     container_name: sawtooth-validator
     ports:
       - '4004:4004/tcp'
@@ -65,8 +65,8 @@ services:
     command: |
       bash -c "
         if [ ! -f /etc/keys/validator.priv ]; then
-        sawadm keygen &&
-        sawset genesis \
+          sawadm keygen &&
+          sawset genesis \
           -k /etc/sawtooth/keys/validator.priv \
           -o config-genesis.batch &&
         sawset proposal create \
