@@ -14,13 +14,13 @@ services:
         - no_proxy
     tty: true
     stdin_open: true
-    image: sawtooth-zenroom-tp:devel
+    image: sawtooth-tp-zenroom:devel
     container_name: zenroom-tp
     depends_on:
       - validator
     command: |
       bash -c "
-        intkey-tp-python -vv -C tcp://validator:4004
+        zenroom-tp-python -vv -C tcp://validator:4004
       "
 
   block-info-tp:

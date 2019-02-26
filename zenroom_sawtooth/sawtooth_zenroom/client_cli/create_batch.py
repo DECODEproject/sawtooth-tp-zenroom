@@ -30,13 +30,13 @@ from sawtooth_signing import CryptoFactory
 from sawtooth_sdk.protobuf import batch_pb2
 from sawtooth_sdk.protobuf import transaction_pb2
 
-from sawtooth_intkey.processor.handler import make_intkey_address
+from sawtooth_zenroom.processor.handler import make_zenroom_address
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class IntKeyPayload:
+class ZenroomPayload:
     def __init__(self, verb, name, value):
         self._verb = verb
         self._name = name
@@ -63,8 +63,8 @@ class IntKeyPayload:
         return self._sha512
 
 
-def create_intkey_transaction(verb, name, value, deps, signer):
-    """Creates a signed intkey transaction.
+def create_zenroom_transaction(verb, name, value, deps, signer):
+    """Creates a signed zenroom transaction.
 
     Args:
         verb (str): the action the transaction takes, either 'set', 'inc',
@@ -78,19 +78,19 @@ def create_intkey_transaction(verb, name, value, deps, signer):
             transaction
 
     Returns:
-        transaction (transaction_pb2.Transaction): the signed intkey
+        transaction (transaction_pb2.Transaction): the signed zenroom
             transaction
     """
-    payload = IntKeyPayload(
+    payload = ZenroomPayload(
         verb=verb, name=name, value=value)
 
     # The prefix should eventually be looked up from the
     # validator's namespace registry.
-    addr = make_intkey_address(name)
+    addr = make_zenroom_address(name)
 
     header = transaction_pb2.TransactionHeader(
         signer_public_key=signer.get_public_key().as_hex(),
-        family_name='intkey',
+        family_name='zenroom',
         family_version='1.0',
         inputs=[addr],
         outputs=[addr],
@@ -152,7 +152,7 @@ def do_populate(batches, keys):
     txns = []
     for i in range(0, len(keys)):
         name = list(keys)[i]
-        txn = create_intkey_transaction(
+        txn = create_zenroom_transaction(
             verb='set',
             name=name,
             value=random.randint(9000, 100000),
@@ -183,7 +183,7 @@ def do_generate(args, batches, keys):
         txns = []
         for _ in range(0, random.randint(1, args.max_batch_size)):
             name = random.choice(list(keys))
-            txn = create_intkey_transaction(
+            txn = create_zenroom_transaction(
                 verb=random.choice(['inc', 'dec']),
                 name=name,
                 value=random.randint(1, 10),
@@ -233,8 +233,8 @@ def add_create_batch_parser(subparsers, parent_parser):
 
     epilog = '''
     details:
-     create sample batch(es) of intkey transactions.
-     populates state with intkey key/value pairs
+     create sample batch(es) of zenroom transactions.
+     populates state with zenroom key/value pairs
      then generates batches with inc and dec transactions.
     '''
 
@@ -248,7 +248,7 @@ def add_create_batch_parser(subparsers, parent_parser):
         '-o', '--output',
         type=str,
         help='location of output file',
-        default='batches.intkey',
+        default='batches.zenroom',
         metavar='')
 
     parser.add_argument(

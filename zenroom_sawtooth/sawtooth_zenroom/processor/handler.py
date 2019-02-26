@@ -1,17 +1,3 @@
-# Copyright 2016 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ------------------------------------------------------------------------------
 
 import logging
 import hashlib
@@ -33,36 +19,34 @@ MIN_VALUE = 0
 MAX_VALUE = 4294967295
 MAX_NAME_LENGTH = 20
 
-FAMILY_NAME = 'intkey'
+FAMILY_NAME = 'zenroom'
 
-INTKEY_ADDRESS_PREFIX = hashlib.sha512(
-    FAMILY_NAME.encode('utf-8')).hexdigest()[0:6]
+ZENROOM_ADDRESS_PREFIX = bytes.fromhex('7a656e') # str("zen"):hex()
 
-
-def make_intkey_address(name):
-    return INTKEY_ADDRESS_PREFIX + hashlib.sha512(
+def make_zenroom_address(name):
+    return ZENROOM_ADDRESS_PREFIX + hashlib.sha512(
         name.encode('utf-8')).hexdigest()[-64:]
 
 
-class IntkeyTransactionHandler(TransactionHandler):
+class ZenroomTransactionHandler(TransactionHandler):
     @property
     def family_name(self):
         return FAMILY_NAME
 
     @property
     def family_versions(self):
-        return ['1.0']
+        return ['0.1']
 
     @property
     def namespaces(self):
-        return [INTKEY_ADDRESS_PREFIX]
+        return [ZENROOM_ADDRESS_PREFIX]
 
     def apply(self, transaction, context):
         verb, name, value = _unpack_transaction(transaction)
 
         state = _get_state_data(name, context)
 
-        updated_state = _do_intkey(verb, name, value, state)
+        updated_state = _do_zenroom(verb, name, value, state)
 
         _set_state_data(name, updated_state, context)
 
@@ -122,7 +106,7 @@ def _validate_value(value):
 
 
 def _get_state_data(name, context):
-    address = make_intkey_address(name)
+    address = make_zenroom_address(name)
 
     state_entries = context.get_state([address])
 
@@ -135,7 +119,7 @@ def _get_state_data(name, context):
 
 
 def _set_state_data(name, state, context):
-    address = make_intkey_address(name)
+    address = make_zenroom_address(name)
 
     encoded = cbor.dumps(state)
 
@@ -145,7 +129,7 @@ def _set_state_data(name, state, context):
         raise InternalError('State error')
 
 
-def _do_intkey(verb, name, value, state):
+def _do_zenroom(verb, name, value, state):
     verbs = {
         'set': _do_set,
         'inc': _do_inc,

@@ -15,30 +15,29 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-# pylint: disable=consider-using-enumerate
-
 import argparse
 import hashlib
 import os
 import logging
 import random
 import string
+import time
 
 import cbor
 
 from sawtooth_signing import create_context
 from sawtooth_signing import CryptoFactory
 
-from sawtooth_sdk.protobuf import batch_pb2
 from sawtooth_sdk.protobuf import transaction_pb2
+from sawtooth_sdk.protobuf import batch_pb2
 
-from sawtooth_intkey.processor.handler import make_intkey_address
+from sawtooth_zenroom.processor.handler import make_zenroom_address
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class IntKeyPayload:
+class ZenroomPayload:
     def __init__(self, verb, name, value):
         self._verb = verb
         self._name = name
@@ -65,17 +64,17 @@ class IntKeyPayload:
         return self._sha512
 
 
-def create_intkey_transaction(verb, name, value, signer):
-    payload = IntKeyPayload(
+def create_zenroom_transaction(verb, name, value, signer):
+    payload = ZenroomPayload(
         verb=verb, name=name, value=value)
 
     # The prefix should eventually be looked up from the
     # validator's namespace registry.
-    addr = make_intkey_address(name)
+    addr = make_zenroom_address(name)
 
     header = transaction_pb2.TransactionHeader(
         signer_public_key=signer.get_public_key().as_hex(),
-        family_name='intkey',
+        family_name='zenroom',
         family_version='1.0',
         inputs=[addr],
         outputs=[addr],
@@ -97,11 +96,11 @@ def create_intkey_transaction(verb, name, value, signer):
 
 
 def create_batch(transactions, signer):
-    transaction_ids = [t.header_signature for t in transactions]
+    transaction_signatures = [t.header_signature for t in transactions]
 
     header = batch_pb2.BatchHeader(
         signer_public_key=signer.get_public_key().as_hex(),
-        transaction_ids=transaction_ids)
+        transaction_ids=transaction_signatures)
 
     header_bytes = header.SerializeToString()
 
@@ -127,7 +126,7 @@ def generate_word_list(count):
         return [generate_word() for _ in range(0, count)]
 
 
-def do_populate(args):
+def do_generate(args):
     context = create_context('secp256k1')
     signer = CryptoFactory(context).new_signer(
         context.new_random_private_key())
@@ -135,22 +134,39 @@ def do_populate(args):
     words = generate_word_list(args.pool_size)
 
     batches = []
+    start = time.time()
     total_txn_count = 0
-    txns = []
-    for i in range(0, len(words)):
-        txn = create_intkey_transaction(
-            verb='set',
-            name=words[i],
-            value=random.randint(9000, 100000),
+    for i in range(0, args.count):
+        txns = []
+        for _ in range(0, random.randint(1, args.batch_max_size)):
+            txn = create_zenroom_transaction(
+                verb=random.choice(['inc', 'dec']),
+                name=random.choice(words),
+                value=1,
+                signer=signer)
+            total_txn_count += 1
+            txns.append(txn)
+
+        batch = create_batch(
+            transactions=txns,
             signer=signer)
-        total_txn_count += 1
-        txns.append(txn)
 
-    batch = create_batch(
-        transactions=txns,
-        signer=signer)
+        batches.append(batch)
 
-    batches.append(batch)
+        if i % 100 == 0 and i != 0:
+            stop = time.time()
+
+            txn_count = 0
+            for batch in batches[-100:]:
+                txn_count += len(batch.transactions)
+
+            fmt = 'batches {}, batch/sec: {:.2f}, txns: {}, txns/sec: {:.2f}'
+            print(fmt.format(
+                str(i),
+                100 / (stop - start),
+                str(total_txn_count),
+                txn_count / (stop - start)))
+            start = stop
 
     batch_list = batch_pb2.BatchList(batches=batches)
 
@@ -159,7 +175,7 @@ def do_populate(args):
         fd.write(batch_list.SerializeToString())
 
 
-def add_populate_parser(subparsers, parent_parser):
+def add_generate_parser(subparsers, parent_parser):
 
     epilog = '''
     deprecated:
@@ -168,7 +184,7 @@ def add_populate_parser(subparsers, parent_parser):
     '''
 
     parser = subparsers.add_parser(
-        'populate',
+        'generate',
         parents=[parent_parser],
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=epilog)
@@ -177,7 +193,19 @@ def add_populate_parser(subparsers, parent_parser):
         '-o', '--output',
         type=str,
         help='location of output file',
-        default='batches.intkey')
+        default='batches.zenroom')
+
+    parser.add_argument(
+        '-c', '--count',
+        type=int,
+        help='number of batches',
+        default=1000)
+
+    parser.add_argument(
+        '-B', '--batch-max-size',
+        type=int,
+        help='max size of the batch',
+        default=20)
 
     parser.add_argument(
         '-P', '--pool-size',

@@ -20,9 +20,9 @@ RUN apt-get install -y -q python3-pip python3-zmq python3-yaml python3-setuptool
 					   	  python3-toml python3-colorlog python3-cbor python3-dev
 RUN pip3 install grpcio-tools requests zenroom
 
-COPY zenroom_python /opt/sawtooth/sdk/examples/zenroom_python
+COPY zenroom_sawtooth /opt/sawtooth/sdk/examples/zenroom_sawtooth
 
-ENV PATH=$PATH:/opt/sawtooth/sdk/examples/zenroom_python
+ENV PATH=$PATH:/opt/sawtooth/sdk/examples/zenroom_sawtooth
 
 WORKDIR /opt/sawtooth
 
@@ -32,8 +32,8 @@ RUN echo "\033[0;32m--- Building zenroom-tp-python ---\n\033[0m" \
  && pip3 install -e . \
  &&	cd ../sdk/python \
  && pip3 install -e . \
- && cd ../examples/zenroom_python \
+ && cd ../examples/zenroom_sawtooth \
  && pip3 install -e .
 
-CMD intkey-tp-python -v -C tcp://localhost:4004
+CMD zenroom-tp-python -v -C tcp://localhost:4004
 

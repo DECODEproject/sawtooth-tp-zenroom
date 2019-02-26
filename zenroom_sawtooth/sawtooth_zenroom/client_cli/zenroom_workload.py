@@ -1,17 +1,3 @@
-# Copyright 2017 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ------------------------------------------------------------------------------
 
 import argparse
 import logging
@@ -28,17 +14,17 @@ from sawtooth_signing import create_context
 from sawtooth_signing import CryptoFactory
 from sawtooth_signing import ParseError
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
-from sawtooth_intkey.client_cli.workload.workload_generator import \
+from sawtooth_zenroom.client_cli.workload.workload_generator import \
     WorkloadGenerator
-from sawtooth_intkey.client_cli.workload.sawtooth_workload import Workload
-from sawtooth_intkey.client_cli.create_batch import create_intkey_transaction
-from sawtooth_intkey.client_cli.create_batch import create_batch
-from sawtooth_intkey.client_cli.exceptions import IntKeyCliException
+from sawtooth_zenroom.client_cli.workload.sawtooth_workload import Workload
+from sawtooth_zenroom.client_cli.create_batch import create_zenroom_transaction
+from sawtooth_zenroom.client_cli.create_batch import create_batch
+from sawtooth_zenroom.client_cli.exceptions import ZenroomCliException
 from sawtooth_sdk.protobuf import batch_pb2
 
 LOGGER = logging.getLogger(__name__)
 
-IntKeyState = namedtuple('IntKeyState', ['name', 'url', 'value'])
+ZenroomState = namedtuple('ZenroomState', ['name', 'url', 'value'])
 
 
 def post_batches(url, batches, auth_info=None):
@@ -66,7 +52,7 @@ def post_batches(url, batches, auth_info=None):
         )
 
 
-class IntKeyWorkload(Workload):
+class ZenroomWorkload(Workload):
     """
     This workload is for the Sawtooth Integer Key transaction family.  In
     order to guarantee that batches of transactions are submitted at a
@@ -85,7 +71,7 @@ class IntKeyWorkload(Workload):
     """
 
     def __init__(self, delegate, args):
-        super(IntKeyWorkload, self).__init__(delegate, args)
+        super(ZenroomWorkload, self).__init__(delegate, args)
         self._auth_info = args.auth_info
         self._urls = []
         self._pending_batches = {}
@@ -103,9 +89,9 @@ class IntKeyWorkload(Workload):
                 self._signer = crypto_factory.new_signer(
                     private_key=private_key)
             except ParseError as pe:
-                raise IntKeyCliException(str(pe))
+                raise ZenroomCliException(str(pe))
             except IOError as ioe:
-                raise IntKeyCliException(str(ioe))
+                raise ZenroomCliException(str(ioe))
         else:
             self._signer = crypto_factory.new_signer(
                 context.new_random_private_key())
@@ -136,7 +122,7 @@ class IntKeyWorkload(Workload):
 
         if key is not None:
             if key.value < 1000000:
-                txn = create_intkey_transaction(
+                txn = create_zenroom_transaction(
                     verb="inc",
                     name=key.name,
                     value=1,
@@ -157,7 +143,7 @@ class IntKeyWorkload(Workload):
                 if code == 202:
                     with self._lock:
                         self._pending_batches[batch.header_signature] = \
-                            IntKeyState(
+                            ZenroomState(
                             name=key.name,
                             url=key.url,
                             value=key.value + 1)
@@ -177,7 +163,7 @@ class IntKeyWorkload(Workload):
         batch_id = None
         if url is not None:
             name = datetime.now().isoformat()[-20:]
-            txn = create_intkey_transaction(
+            txn = create_zenroom_transaction(
                 verb="set",
                 name=name,
                 value=0,
@@ -198,20 +184,20 @@ class IntKeyWorkload(Workload):
             if code == 202:
                 with self._lock:
                     self._pending_batches[batch_id] = \
-                        IntKeyState(name=name, url=url, value=0)
+                        ZenroomState(name=name, url=url, value=0)
 
                 self.delegate.on_new_batch(batch_id, url)
 
 
 def do_workload(args):
     """
-    Create WorkloadGenerator and IntKeyWorkload. Set IntKey workload in
+    Create WorkloadGenerator and ZenroomWorkload. Set Zenroom workload in
     generator and run.
     """
     try:
         args.auth_info = _get_auth_info(args.auth_user, args.auth_password)
         generator = WorkloadGenerator(args)
-        workload = IntKeyWorkload(generator, args)
+        workload = ZenroomWorkload(generator, args)
         generator.set_workload(workload)
         generator.run()
     except KeyboardInterrupt:

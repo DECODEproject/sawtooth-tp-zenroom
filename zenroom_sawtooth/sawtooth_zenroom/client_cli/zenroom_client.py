@@ -1,17 +1,3 @@
-# Copyright 2017 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ------------------------------------------------------------------------------
 
 import hashlib
 import base64
@@ -32,14 +18,14 @@ from sawtooth_sdk.protobuf.batch_pb2 import BatchList
 from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader
 from sawtooth_sdk.protobuf.batch_pb2 import Batch
 
-from sawtooth_intkey.client_cli.exceptions import IntkeyClientException
+from sawtooth_zenroom.client_cli.exceptions import ZenroomClientException
 
 
 def _sha512(data):
     return hashlib.sha512(data).hexdigest()
 
 
-class IntkeyClient:
+class ZenroomClient:
     def __init__(self, url, keyfile=None):
         self.url = url
 
@@ -49,13 +35,13 @@ class IntkeyClient:
                     private_key_str = fd.read().strip()
                     fd.close()
             except OSError as err:
-                raise IntkeyClientException(
+                raise ZenroomClientException(
                     'Failed to read private key: {}'.format(str(err)))
 
             try:
                 private_key = Secp256k1PrivateKey.from_hex(private_key_str)
             except ParseError as e:
-                raise IntkeyClientException(
+                raise ZenroomClientException(
                     'Unable to load private key: {}'.format(str(e)))
 
             self._signer = CryptoFactory(
@@ -108,10 +94,10 @@ class IntkeyClient:
                 'batch_statuses?id={}&wait={}'.format(batch_id, wait),)
             return yaml.safe_load(result)['data'][0]['status']
         except BaseException as err:
-            raise IntkeyClientException(err)
+            raise ZenroomClientException(err)
 
     def _get_prefix(self):
-        return _sha512('intkey'.encode('utf-8'))[0:6]
+        return _sha512('zenroom'.encode('utf-8'))[0:6]
 
     def _get_address(self, name):
         prefix = self._get_prefix()
@@ -136,18 +122,18 @@ class IntkeyClient:
                 result = requests.get(url, headers=headers)
 
             if result.status_code == 404:
-                raise IntkeyClientException("No such key: {}".format(name))
+                raise ZenroomClientException("No such key: {}".format(name))
 
             elif not result.ok:
-                raise IntkeyClientException("Error {}: {}".format(
+                raise ZenroomClientException("Error {}: {}".format(
                     result.status_code, result.reason))
 
         except requests.ConnectionError as err:
-            raise IntkeyClientException(
+            raise ZenroomClientException(
                 'Failed to connect to REST API: {}'.format(err))
 
         except BaseException as err:
-            raise IntkeyClientException(err)
+            raise ZenroomClientException(err)
 
         return result.text
 
@@ -163,7 +149,7 @@ class IntkeyClient:
 
         header = TransactionHeader(
             signer_public_key=self._signer.get_public_key().as_hex(),
-            family_name="intkey",
+            family_name="zenroom",
             family_version="1.0",
             inputs=[address],
             outputs=[address],

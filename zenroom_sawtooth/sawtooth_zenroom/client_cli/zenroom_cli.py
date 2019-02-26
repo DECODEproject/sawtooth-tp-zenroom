@@ -23,23 +23,23 @@ import pkg_resources
 
 from colorlog import ColoredFormatter
 
-from sawtooth_intkey.client_cli.generate import add_generate_parser
-from sawtooth_intkey.client_cli.generate import do_generate
-from sawtooth_intkey.client_cli.populate import add_populate_parser
-from sawtooth_intkey.client_cli.populate import do_populate
-from sawtooth_intkey.client_cli.create_batch import add_create_batch_parser
-from sawtooth_intkey.client_cli.create_batch import do_create_batch
-from sawtooth_intkey.client_cli.load import add_load_parser
-from sawtooth_intkey.client_cli.load import do_load
-from sawtooth_intkey.client_cli.intkey_workload import add_workload_parser
-from sawtooth_intkey.client_cli.intkey_workload import do_workload
+from sawtooth_zenroom.client_cli.generate import add_generate_parser
+from sawtooth_zenroom.client_cli.generate import do_generate
+from sawtooth_zenroom.client_cli.populate import add_populate_parser
+from sawtooth_zenroom.client_cli.populate import do_populate
+from sawtooth_zenroom.client_cli.create_batch import add_create_batch_parser
+from sawtooth_zenroom.client_cli.create_batch import do_create_batch
+from sawtooth_zenroom.client_cli.load import add_load_parser
+from sawtooth_zenroom.client_cli.load import do_load
+from sawtooth_zenroom.client_cli.zenroom_workload import add_workload_parser
+from sawtooth_zenroom.client_cli.zenroom_workload import do_workload
 
-from sawtooth_intkey.client_cli.intkey_client import IntkeyClient
-from sawtooth_intkey.client_cli.exceptions import IntKeyCliException
-from sawtooth_intkey.client_cli.exceptions import IntkeyClientException
+from sawtooth_zenroom.client_cli.zenroom_client import ZenroomClient
+from sawtooth_zenroom.client_cli.exceptions import ZenroomCliException
+from sawtooth_zenroom.client_cli.exceptions import ZenroomClientException
 
 
-DISTRIBUTION_NAME = 'sawtooth-intkey'
+DISTRIBUTION_NAME = 'sawtooth-zenroom'
 
 
 DEFAULT_URL = 'http://127.0.0.1:8008'
@@ -126,13 +126,13 @@ def create_parser(prog_name):
 
 
 def add_set_parser(subparsers, parent_parser):
-    message = 'Sends an intkey transaction to set <name> to <value>.'
+    message = 'Sends an zenroom transaction to set <name> to <value>.'
 
     parser = subparsers.add_parser(
         'set',
         parents=[parent_parser],
         description=message,
-        help='Sets an intkey value')
+        help='Sets an zenroom value')
 
     parser.add_argument(
         'name',
@@ -170,7 +170,7 @@ def do_set(args):
 
 
 def add_inc_parser(subparsers, parent_parser):
-    message = 'Sends an intkey transaction to increment <name> by <value>.'
+    message = 'Sends an zenroom transaction to increment <name> by <value>.'
 
     parser = subparsers.add_parser(
         'inc',
@@ -259,13 +259,13 @@ def do_zenroom(args):
 
 
 def add_dec_parser(subparsers, parent_parser):
-    message = 'Sends an intkey transaction to decrement <name> by <value>.'
+    message = 'Sends an zenroom transaction to decrement <name> by <value>.'
 
     parser = subparsers.add_parser(
         'dec',
         parents=[parent_parser],
         description=message,
-        help='Decrements an intkey value')
+        help='Decrements an zenroom value')
 
     parser.add_argument(
         'name',
@@ -309,7 +309,7 @@ def add_show_parser(subparsers, parent_parser):
         'show',
         parents=[parent_parser],
         description=message,
-        help='Displays the specified intkey value')
+        help='Displays the specified zenroom value')
 
     parser.add_argument(
         'name',
@@ -330,13 +330,13 @@ def do_show(args):
 
 
 def add_list_parser(subparsers, parent_parser):
-    message = 'Shows the values of all keys in intkey state.'
+    message = 'Shows the values of all keys in zenroom state.'
 
     parser = subparsers.add_parser(
         'list',
         parents=[parent_parser],
         description=message,
-        help='Displays all intkey values')
+        help='Displays all zenroom values')
 
     parser.add_argument(
         '--url',
@@ -353,7 +353,7 @@ def do_list(args):
 
 
 def _get_client(args, read_key_file=True):
-    return IntkeyClient(
+    return ZenroomClient(
         url=DEFAULT_URL if args.url is None else args.url,
         keyfile=_get_keyfile(args) if read_key_file else None)
 
@@ -412,14 +412,14 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_workload(args)
 
     else:
-        raise IntKeyCliException("invalid command: {}".format(args.command))
+        raise ZenroomCliException("invalid command: {}".format(args.command))
 
 
 def main_wrapper():
     # pylint: disable=bare-except
     try:
         main()
-    except (IntKeyCliException, IntkeyClientException) as err:
+    except (ZenroomCliException, ZenroomClientException) as err:
         print("Error: {}".format(err), file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
