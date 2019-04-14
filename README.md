@@ -6,9 +6,11 @@ To facilitate the creation of transaction families based on Zenroom and the [Zen
 
 ## Getting started
 
-After reading Sawtooth's documentation and understanding its architecture and operational underpinnings, one can start playing around with this transaction processor simply using Docker. 
+After reading Sawtooth's [documentation](https://sawtooth.hyperledger.org/docs/core/releases/1.0/app_developers_guide/docker.html#using-sawtooth-with-docker) and understanding its architecture and operational underpinnings, one can start playing around with this transaction processor simply using Docker. 
 
 To start a local instance of Sawtooth using the [devmode consensus engine](https://github.com/hyperledger/sawtooth-devmode), a single local Validator node and of course the Zenroom TP, run:
+
+
 
 ```
 docker-compose up
@@ -21,6 +23,26 @@ docker-compose stop
 docker-compose rm
 ```
 
+## To develop the tp on OSX
+
+https://github.com/ludbb/secp256k1-py#installation-with-compilation
+
+```
+brew install automake pkg-config libtool libffi gmp
+python3 ./setup.py install
+```
+
+You will need an osx build of the zenroom-py module. 
+
+```
+. ./.sawtooth-tp.venv/bin/activate
+pip uninstall zenroom
+pip install ../zenroom-py/dist/zenroom-0.1.3.tar.gz 
+
+cd zenroom_sawtooth
+nosetests tests
+```
+ 
 
 ## To run a sawtooth command
 
@@ -35,6 +57,19 @@ To use Sawtooth's CLI commands append the `--url http://rest-api:8090`
 For instance:
 ```
 sawtooth peer --url http://rest-api:8080 list 
+```
+
+## ssh to one of the containers, e.g. rest-api
+
+```
+docker-compose exec rest-api bash
+```
+
+See https://sawtooth.hyperledger.org/docs/core/releases/1.0/app_developers_guide/docker.html#logging-into-the-client-container
+
+To see something happening:
+```
+docker-compose exec -it sawtooth-validator bash
 ```
 
 # Acknowledgements

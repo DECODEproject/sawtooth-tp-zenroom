@@ -23,22 +23,22 @@ services:
         zenroom-tp-python -vv -C tcp://validator:4004
       "
 
-  block-info-tp:
-    image: hyperledger/sawtooth-block-info-tp:latest
-    container_name: block-info-tp
-    depends_on:
-      - validator
-    command: block-info-tp -vv --connect tcp://validator:4004
-
+#  block-info-tp:
+#    image: hyperledger/sawtooth-block-info-tp:1.0
+#    container_name: block-info-tp
+#    depends_on:
+#      - validator
+#    command: block-info-tp -vv --connect tcp://validator:4004
+#
   settings-tp:
-    image: hyperledger/sawtooth-settings-tp:latest
+    image: hyperledger/sawtooth-settings-tp:1.0
     container_name: settings-tp
     depends_on:
       - validator
     command: settings-tp -vv --connect tcp://validator:4004
 
   rest-api:
-    image: hyperledger/sawtooth-rest-api:latest
+    image: hyperledger/sawtooth-rest-api:1.0
     container_name: rest-api
     ports:
       - '8090:8090'
@@ -49,15 +49,25 @@ services:
         --connect tcp://validator:4004
         --bind rest-api:8090
 
-  devmode-rust:
-    image: hyperledger/sawtooth-devmode-engine-rust:latest
-    container_name: devmode-engine-rust
+  shell:
+    image: hyperledger/sawtooth-all:1.0
+    container_name: sawtooth-shell-default
     depends_on:
-      - validator
-    command: devmode-engine-rust -v --connect tcp://validator:5050
+      - rest-api
+    entrypoint: "bash -c \"\
+          sawtooth keygen && \
+          tail -f /dev/null \
+          \""
+
+#  devmode-rust:
+#    image: hyperledger/sawtooth-devmode-engine-rust:1.0
+#    container_name: devmode-engine-rust
+#    depends_on:
+#      - validator
+#    command: devmode-engine-rust -v --connect tcp://validator:5050
 
   validator:
-    image: hyperledger/sawtooth-validator:latest
+    image: hyperledger/sawtooth-validator:1.0
     container_name: sawtooth-validator
     ports:
       - '4004:4004/tcp'
