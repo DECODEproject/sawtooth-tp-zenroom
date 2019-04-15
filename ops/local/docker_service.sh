@@ -7,7 +7,7 @@ set -o pipefail # https://coderwall.com/p/fkfaqq/safer-bash-scripts-with-set-eux
 
 SCRIPT_HOME=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 
-source ${SCRIPT_HOME}/../lib/env.sh
+source ${SCRIPT_HOME}/../_lib/env.sh
 
 
 CHAINSPACE_API_URL="http://localhost:5000/api/1.0/"

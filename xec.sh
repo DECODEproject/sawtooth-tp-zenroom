@@ -8,7 +8,7 @@ set -u # unset variables cause an error
 set -o pipefail # https://coderwall.com/p/fkfaqq/safer-bash-scripts-with-set-euxo-pipefail
 #set -x # for debugging each command
 
-source ops/lib/lib.sh
+source ops/_lib/lib.sh
 
 function install {
     echo -e "'nInstalling 'xec' alias so you just have to type 'xec ...' instead of './xec.sh' ...\n"
