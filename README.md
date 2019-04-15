@@ -7,6 +7,18 @@ To facilitate the creation of transaction families based on Zenroom and the [Zen
 ## Getting started
 
 After reading Sawtooth's [documentation](https://sawtooth.hyperledger.org/docs/core/releases/1.0/app_developers_guide/docker.html#using-sawtooth-with-docker) and understanding its architecture and operational underpinnings, one can start playing around with this transaction processor simply using Docker. 
+ 
+
+There is a script `xec.sh` which can be used to operate docker compose. This will create a network with the following containers:
+
+| docker-compose service | Container name         | purpose |
+| ---------------------- | ---------------------- | ------- |
+| validator              | sawtooth-validator     | Main "node" of the blockchain which executes and validates transactions |
+| rest-api               | rest-api               | Provides a http / json adaptor over the zeromq protocol to allow clients to talk to the validator from within and also from the host machine|
+| shell                  | sawtooth-shell-default | Provides a container with various commands in it which allows you to connect to the rest api from within the docker network | 
+| settings-tp            | settings-tp            | A standard transaction processor that allows settings to be configured in the blockchainsd
+
+
 
 To start a local instance of Sawtooth using the [devmode consensus engine](https://github.com/hyperledger/sawtooth-devmode), a single local Validator node and of course the Zenroom TP, run:
 
